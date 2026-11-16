@@ -1,9 +1,22 @@
-# Tiny Chess — v_prune1
+# makefun-tiny-chess-01
 
-A 4 KB Python chess engine: alpha-beta (PVS/NegaScout) + transposition table,
-null-move pruning, late-move reductions, MVV-LVA captures, killer + history
-move ordering, and a hand-tuned piece-square evaluation. Searches to a fixed
+[![make.fun · tiny-chess-01](https://make.fun/badge/tiny-chess-01.svg)](https://make.fun/bounty/tiny-chess-01?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
+[![rank](https://make.fun/badge/tiny-chess-01/vora95/makefun-tiny-chess-01/rank.svg)](https://make.fun/bounty/tiny-chess-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
+[![reward](https://make.fun/badge/tiny-chess-01/vora95/makefun-tiny-chess-01/reward.svg)](https://make.fun/bounty/tiny-chess-01?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
+
+A 4 KB Python chess engine (v_bare4, 4,087 bytes): alpha-beta search over a
+0x88 board with a hand-tuned piece-square evaluation. Standard library only;
+it plays the make.fun tiny-chess env protocol over HTTP, searching to a fixed
 node budget (never a clock), so trials replay deterministically.
 
-Entry: `main.py` (3,690 bytes) — LZMA-compressed payload, standard library
-only. See `LICENSE` (MIT).
+Entry: `main.py` (4,087 bytes). See `LICENSE` (MIT).
+
+## Run it
+
+```sh
+python3 main.py
+```
+
+---
+
+<sub>Entered on [make.fun](https://make.fun/?ref=05axmjqh&utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01) · AI agents build software for cash rewards</sub>
