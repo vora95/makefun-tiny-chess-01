@@ -1,138 +1,155 @@
-import json,os,sys,urllib.request as U;E=os.environ.get("MAKEFUN_ENV_URL","");W=100000
-V=[0,100,320,330,500,900,0];KN=[-31,-33,-14,-18,14,18,31,33];BI=[15,17,-15,-17];RO=[1,-1,16,-16];KI=RO+BI
-b=[0]*128;c=0;e=-1
-S=lambda a:"abcdefgh"[a&7]+str(a//16+1)
-Q=lambda s,a:(int(s[a+1])-1)*16+ord(s[a])-97
+import json,os
+from urllib.request import urlopen,Request
+V=[0,100,320,330,500,900,0]
+D=4
+Z=100000
+R='kkkljkkkjkkkjkkkjkkkjkkklmmmkkkk'
+PS=['kkkklmmgljikkkkollmpmmoquuuukkkk','aceecgklelmneknoelnoekmncgkkacee','giiiilkkimmmikmmillmiklmikkkgiii',R,R,'oqmkookkiggggeececcaeccaeccaecca']
+KN=[14,18,31,33,-14,-18,-31,-33];KG=[1,15,16,17,-1,-15,-16,-17]
+DS=[KN,[15,17,-15,-17],[1,16,-1,-16],KG,KG];CS=[(4,1,6,5,7),(4,2,2,3,0),(116,4,118,117,119),(116,8,114,115,112)]
+PT=[[(ord(t[(q>>4)*4+min(q&7,7-(q&7))])-97)*5-50 if not q&136 else 0 for q in range(128)] for t in PS]
+O=lambda m:V[abs(b[(m>>7)&127])]*10-V[abs(b[m&127])]
+P=lambda u,o:json.load(urlopen(Request(u,json.dumps(o).encode())))
+b=[0]*128;s=1;c=15;e=-1;kw=4;kb=116;U=[]
 def F(f):
- global b,s,n,u,kw,kb;p=f.split();b=[0]*128;n=[0]*13;q=112
- for h in p[0]:
-  if h=="/":q-=24
-  elif h.isdigit():q+=int(h)
-  else:d="PNBRQKpnbrqk".index(h)+1;b[q]=d;n[d]+=1;q+=1
- s=2*(p[1]=="w")-1;u=[];kw=b.index(6);kb=b.index(12)
-def K(q,w):
- o=0 if w else 6
- for t in(q-15,q-17)if w else(q+15,q+17):
-  if not t&0x88 and b[t]==1+o:return True
- for z,y in((KN,2),(KI,6)):
-  for d in z:
-   t=q+d
-   if not t&0x88 and b[t]==y+o:return True
- for z,y in((BI,3),(RO,4)):
-  for d in z:
-   t=q+d
-   while not t&0x88:
-    p=b[t]
-    if p:
-     if p in(y+o,5+o):return True
-     break
-    t+=d
- return False
-def ev():
+ global b,s,c,e,kw,kb
+ b=[0]*128;p=f.split();r=7;q=0
+ for ch in p[0]:
+  if(ch=='/'):r-=1;q=0
+  elif ch.isdigit():q+=int(ch)
+  else:
+   sq=r*16+q;pc='PNBRQK'.index(ch.upper())+1
+   if ch.islower():pc=-pc
+   b[sq]=pc;q+=1
+   if pc==6:kw=sq
+   elif pc==-6:kb=sq
+ s=1 if p[1]=='w' else -1;c=sum(1<<i for i,k in enumerate('KQkq') if k in p[2])
+ e=-1
+ if p[3]!='-':e=ord(p[3][0])-97+(int(p[3][1])-1)*16
+def A(q,w):
+ P2=1 if w else -1
+ for d in(15,17):
+  t=q-d*P2
+  if t&136==0 and b[t]==P2:return 1
+ for d in KN:
+  t=q+d
+  if t&136==0 and b[t]==2*P2:return 1
+ for d in KG:
+  t=q+d
+  if t&136==0 and b[t]==6*P2:return 1
+  while t&136==0:
+   p=b[t]
+   if p:
+    if p==5*P2 or p==(3 if abs(d) in(15,17) else 4)*P2:return 1
+    break
+   t+=d
+ return 0
+def G(o=False):
+ ms=[]
+ for q in range(128):
+  if q&136:continue
+  p=b[q]
+  if not p or(p>0)!=(s==1):continue
+  a=abs(p)
+  if a==1:
+   d=16*s
+   for dd in(0,-1,1):
+    t=q+d+dd
+    if t&136:continue
+    if(dd==0 and b[t])or(dd and b[t] and(b[t]>0)==(s==1))or(dd and not b[t] and t!=e):continue
+    if(t>>4)==(7 if s==1 else 0):ms.append(q|(t<<7)|(5<<14))
+    elif dd or not o:
+     ms.append(q|(t<<7))
+     if not dd and(q>>4)==(1 if s==1 else 6) and b[t+d]==0:ms.append(q|((t+d)<<7))
+  else:
+   ds=DS[a-2]
+   for dd in ds:
+    t=q+dd
+    while t&136==0:
+     if b[t]:
+      if(b[t]>0)!=(s==1):ms.append(q|(t<<7))
+      break
+     if not o:ms.append(q|(t<<7))
+     if not 2<a<6:break
+     t+=dd
+   if a==6 and not o:
+    for K,R,k,d,r in CS:
+     if q==K and c&R and b[d]==b[k]==b[k-1]==0 and b[r]==4*s and not A(K,s==-1) and not A(d,s==-1):ms.append(K|(k<<7))
+ return ms
+def M(m):
+ global s,c,e,kw,kb
+ U.append((b[:],s,c,e,kw,kb))
+ f=m&127;t=(m>>7)&127;q=m>>14;pc=b[f];cp=b[t]
+ if abs(pc)==1 and t==e and cp==0:
+  x=t-16 if s==1 else t+16;cp=b[x];b[x]=0
+ b[t]=q if q else pc;b[f]=0
+ if abs(pc)==6:
+  if abs(t-f)==2:
+   r=t+1 if t>f else t-2;w=t-1 if t>f else t+1;b[w]=b[r];b[r]=0
+  if pc==6:kw=t
+  else:kb=t
+ for sq,bit in((0,2),(7,1),(112,8),(119,4),(4,3),(116,12)):
+  if f==sq or t==sq:c&=~bit
+ e=(f+t)//2 if abs(pc)==1 and abs(t-f)==32 else -1
+ s=-s
+def W():
+ global s,c,e,kw,kb
+ bb,s,c,e,kw,kb=U.pop()
+ b[:]=bb
+def E():
  sc=0
  for q in range(128):
-  if q&0x88 or not(p:=b[q]):continue
-  w=p<=6;t=p if w else p-6;r=q>>4;f=q&7;l=r if w else 7-r;g=min(f,7-f)+min(l,7-l)
-  if t==1:
-   v=100+[0,0,4,8,14,24,40,0][l]+([0,0,0,10,15,10,5,0][l] if f in(3,4) else 0);j=kw if w else kb
-   if abs(f-(j&7))<=1 and l==(j>>4 if w else 7-(j>>4))+1:v+=5
-  else:v=(0,0,320+6*g-20,330+4*g-8,500+(15 if l==6 else 0)+(5 if l==0 and f in(3,4) else 0),900+2*g-6,0)[t]
-  sc+=v if w else -v
- h=sum(V[i]*(n[i]+n[i+6])for i in(2,3,4,5));h=min(h,6400)
- for j,g in((kw,1),(kb,-1)):
-  f=j&7;l=j>>4 if g>0 else 7-(j>>4);c=min(f,7-f);m=[20,25,10,0][c] if l==0 else max(-50,-15*l);z=8*(c+min(l,7-l))-24;sc+=g*(m*h+z*(6400-h))//6400
- sc+=30*((n[3]>1)-(n[9]>1));return sc if s>0 else -sc
-def G():
- w=s>0;m=[]
- def A(a,y):
-  if(y>>4)==(7,0)[w==0]:
-   for r in(5,4,3,2):m.append(a|(y<<7)|(r<<14))
-  else:m.append(a|(y<<7))
- for q in range(128):
-  if q&0x88 or not(p:=b[q])or(p<=6)!=w:continue
-  t=p if p<=6 else p-6
-  if t==1:
-   d=(16,-16)[w==0];v=q+d
-   if b[v]==0:
-    A(q,v)
-    if(q>>4)==(1,6)[w==0]:
-     x=q+2*d
-     if b[x]==0:m.append(q|(x<<7))
-   for z in(d-1,d+1):
-    y=q+z
-    if y&0x88:continue
-    r=b[y]
-    if r and(r<=6)!=w and r%6:A(q,y)
-  else:
-   for d in(KN,BI,RO,BI+RO,KI)[t-2]:
-    y=q+d
-    while not y&0x88:
-     r=b[y]
-     if r==0:m.append(q|(y<<7))
-     else:
-      if(r<=6)!=w and r%6:m.append(q|(y<<7))
-      break
-     if t in(2,6):break
-     y+=d
- return m
-def k(v):
- global s,kw,kb;f=v&127;y=(v>>7)&127;r=(v>>14)&7;p=b[f];w=p<=6;z=b[y];u.append((v,z))
- if z:b[y]=0;n[z]-=1
- a=(r if w else r+6) if r else p;b[y]=a;b[f]=0
- if p==6:kw=y
- elif p==12:kb=y
- n[p]-=1;n[a]+=1;s=-s;return z
-def X():
- global s,kw,kb;v,z=u.pop();f=v&127;y=(v>>7)&127;r=(v>>14)&7;p=b[y];s=-s;n[p]-=1
- if r:p=1 if p<=6 else 7
- n[p]+=1;b[f]=p;b[y]=0
- if z:b[y]=z;n[z]+=1
- if p==6:kw=f
- elif p==12:kb=f
-def o(v):v.sort(key=lambda m:(W+10*V[b[(m>>7)&127]%6 or 6]-V[b[m&127]%6 or 6]if b[(m>>7)&127]else 0)+(90000+V[(m>>14)&7]if(m>>14)&7 else 0),reverse=True)
-def N(d,a,A,y):
- global nn,ab
- if d<=0:return ev()
- nn+=1
- if nn>=lm:ab=True;return 0
- v=G();o(v);z=-W-1;l=0
- for m in v:
-  k(m)
-  if K(kb if s>0 else kw,s>0):X();continue
-  l+=1;g=-N(d-1,-A,-a,y+1);X()
-  if ab:return 0
-  if g>z:z=g
-  if g>a:a=g
-  if a>=A:break
- if l==0:return -W+y if K(kw if s>0 else kb,s<0) else 0
- return z
-def t(v):
- global nn,lm,ab
- g={m:0 for m in v};o(v);z=v[0]
- for d in range(1,33):
-  nn=0;lm=15e3;ab=False;v.sort(key=lambda m:-g[m]);a=-W-1;A=W+1;h=v[0]
-  for m in v:
-   k(m);x=-N(d-1,-A,-a,1);X()
-   if ab:break
-   g[m]=x
-   if x>a:a=x;h=m
-  if ab:break
-  z=h
- return z
-def C(m):r=(m>>14)&7;return S(m&127)+S((m>>7)&127)+("  nbrq"[r] if r else "")
-def P(u):
- f=Q(u,0);y=Q(u,2);r=" pnbrqk".index(u[4]) if len(u)==5 else 0;return f|(y<<7)|(r<<14)
-def q(a,z):
- try:
-  with U.urlopen(E+a,json.dumps(z).encode()) as r:return json.load(r)
- except U.HTTPError as x:sys.exit(x.code)
-def M():
- if not E:sys.exit(1)
- while 1:
-  g=q("/game",{})
-  if g["status"]=="done":break
-  F(g["fen"])
-  while g["status"]=="your_move":
-   g=q("/move",{"game":g["game"],"move":C(t([P(x) for x in g["legal_moves"]]))})
-   if g["status"]=="your_move":F(g["fen"])
-M()
+  p=b[q]
+  if q&136 or not p:continue
+  a=abs(p)
+  if p>0:sc+=V[a]+PT[a-1][q]
+  else:sc-=V[a]+PT[a-1][q^112]
+ return sc if s==1 else -sc
+def S(d,a,bb,pl):
+ chk=A(kw if s==1 else kb,s==-1)
+ if d<=0:
+  if pl>64:return E()
+  if not chk:
+   v=E()
+   if v>=bb:return v
+   if v>a:a=v
+  ms=G(True) if not chk else G()
+ else:ms=G()
+ ms.sort(key=O,reverse=True)
+ n=0
+ for m in ms:
+  M(m)
+  if A(kb if s==1 else kw,s==1):W();continue
+  n+=1
+  sc=-S(d-1,-bb,-a,pl+1)
+  W()
+  if sc>a:a=sc
+  if a>=bb:break
+ if d<=0:
+  if chk and n==0:return -Z+pl
+  return a
+ if n==0:return -Z+pl if chk else 0
+ return a
+def R(lg):
+ bm=lg[0];a=-Z
+ lg.sort(key=O,reverse=True)
+ for m in lg:
+  M(m)
+  if A(kb if s==1 else kw,s==1):W();continue
+  sc=-S(D-1,-Z,-a,1)
+  W()
+  if sc>a:a=sc;bm=m
+ return bm
+Y=lambda x:chr(97+(x&7))+str((x>>4)+1)
+def C(m):
+ return Y(m&127)+Y((m>>7)&127)+('nbrq'[(m>>14)-2] if m>>14 else '')
+def main():
+ u=os.environ['MAKEFUN_ENV_URL']
+ while True:
+  g=P(u+'/game',{})
+  if g['status']=='done':break
+  while g['status']=='your_move':
+   F(g['fen'])
+   ms=[m for m in G() if C(m) in g['legal_moves']]
+   g=P(u+'/move',{'game':g['game'],'move':C(R(ms))})
+main()
